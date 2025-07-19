@@ -6,24 +6,46 @@ if (!isset($_SESSION["numero"])) {
     $_SESSION["tentativas"] = 0;
 }
 
-$chute = $_POST["chute"];
-$_SESSION["tentativas"]++;
+$mensagem = "";
 
-$numero = $_SESSION["numero"];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $chute = $_POST["chute"];
+    $_SESSION["tentativas"]++;
 
-if ($chute < $numero) {
-    echo "Tente um número maior que $chute.<br>";
-} elseif ($chute > $numero) {
-    echo "Tente um número menor que $chute.<br>";
-} else {
-    echo "Parabéns! Você acertou o número $numero!<br>";
-    echo "Número de tentativas: " . $_SESSION["tentativas"];
-    session_destroy();
-    exit;
+
+    $acertou = false;
+    while (!$acertou) {
+        if ($chute < $_SESSION["numero"]) {
+            $mensagem = "Tente um número maior que $chute.";
+            break;
+        } elseif ($chute > $_SESSION["numero"]) {
+            $mensagem = "Tente um número menor que $chute.";
+            break;
+        } else {
+            $mensagem = "Parabéns! Você acertou o número {$_SESSION["numero"]} em {$_SESSION["tentativas"]} tentativas.";
+            session_destroy();
+            $acertou = true;
+            break;
+        }
+    }
 }
+
 ?>
 
-<form method="post">
-    <input type="number" name="chute" placeholder="Tente novamente" required>
-    <input type="submit" value="Chutar">
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo da Adivinhação</title>
+</head>
+<body>
+    <h2>Jogo da Adivinhação (1 a 20)</h2>
+
+    <?php if (!empty($mensagem)) echo "<p>$mensagem</p>"; ?>
+
+    <form method="post">
+        <input type="number" name="chute" placeholder="Digite um número" required>
+        <input type="submit" value="Chutar">
+    </form>
+</body>
+</html>
